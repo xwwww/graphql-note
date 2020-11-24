@@ -6,17 +6,39 @@ const {
   GraphQLID,
   GraphQLInt,
   GraphQLList,
-  GraphQLNonNull
+  GraphQLNonNull,
+  GraphQLInputObjectType
 } = graphql
-const _ = require('lodash')
 const Book = require('../models/book')
 const Author = require('../models/author')
+
+const PaginationArgType = new GraphQLInputObjectType({
+  name: 'PaginationArg',
+  fields: {
+    offset: {
+      type: GraphQLInt,
+      description: "偏移量"
+    },
+    limit: {
+      type: GraphQLInt,
+      description: "数量"
+    },
+  }
+})
+
+const PaginatedListType = (ItemType) => new GraphQLObjectType({
+  name: 'Paginated' + ItemType,
+  fields: {
+    count: { type: GraphQLInt },
+    items: { type: new GraphQLList(ItemType) }
+  }
+})
 
 const BookType = new GraphQLObjectType({
   name: 'Book',
   fields: () => ({
     id: { type: GraphQLID },
-    name: { type: GraphQLString },
+    title: { type: GraphQLString },
     genre: { type: GraphQLString },
     author: {
       type: AuthorType,
@@ -61,8 +83,20 @@ const RootQuery = new GraphQLObjectType({
       }
     },
     books: {
+      // type: PaginatedListType(BookType),
       type: new GraphQLList(BookType),
+      // args: {
+      //   pagination: {
+      //     type: PaginationArgType,
+      //     defaultValue: { offset: 0, limit: 10 }
+      //   }
+      // },
       resolve(parent, args) {
+        // const { offset, limit } = args.pagination
+        // return {
+        //   items: Book.find().skip(offset).limit(limit).exec(),
+        //   count: Book.count()
+        // }
         return Book.find()
       }
     },
@@ -95,19 +129,19 @@ const Mutation = new GraphQLObjectType({
     addBook: {
       type: BookType,
       args: {
-        name: { type: new GraphQLNonNull(GraphQLString) },
+        title: { type: new GraphQLNonNull(GraphQLString) },
         genre: { type: new GraphQLNonNull(GraphQLString) },
         authorId: { type: new GraphQLNonNull(GraphQLID) }
       },
       resolve(parent, args) {
         let book = new Book({
-          name: args.name,
+          title: args.title,
           genre: args.genre,
           authorId: args.authorId
         })
         return book.save()
       }
-    },
+    }
   }
 })
 

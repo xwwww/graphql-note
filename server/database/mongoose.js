@@ -1,16 +1,9 @@
-/*
- * @Author: your name
- * @Date: 2020-10-31 20:30:24
- * @LastEditTime: 2020-10-31 20:34:03
- * @LastEditors: Please set LastEditors
- * @Description: In User Settings Edit
- * @FilePath: /graphql-playlist/server/database/mongoose.js
- */
 const mongoose = require('mongoose')
 
 module.exports = () => {
   mongoose.connect('mongodb://localhost/graphql', {
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    useNewUrlParser: true
   })
 
   const db = mongoose.connection
